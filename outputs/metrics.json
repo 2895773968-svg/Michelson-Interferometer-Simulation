@@ -1,0 +1,34 @@
+{
+  "wavelength_nm": 632.8,
+  "aperture_mm": 8.0,
+  "field_mm": 10.0,
+  "grid_px": 2048,
+  "pixel_pitch_um": 4.8828125,
+  "tilt_case": {
+    "fringes_across_aperture": 10.0,
+    "fringe_spacing_mm": 0.8,
+    "fringe_spacing_um": 800.0,
+    "mirror_tilt_urad": 395.49999999999994,
+    "mirror_tilt_arcsec": 81.5777308707266,
+    "wavefront_angle_arcsec": 163.1554617414532,
+    "opd_max_waves": 5.0,
+    "measured_visibility": 0.8785,
+    "wavefront_rms_waves": 2.5,
+    "target_visibility": 0.8,
+    "visibility_margin": 0.0785
+  },
+  "rings_case": {
+    "arm_detune_mm": 0.2,
+    "imaging_lens_f_mm": 25.0,
+    "interference_order_center": 632.1112515802781,
+    "interference_order_edge": 624.1723337020893,
+    "rings_across_radius": 7.938917878188818,
+    "opd_center_um": 400.0,
+    "note": "at dL -> 0 rings expand to a single fringe (phase insensitivity)",
+    "measured_visibility": 0.8635,
+    "measured_visibility_with_piston_removed": 0.8635,
+    "wavefront_rms_waves": 2.292,
+    "pv_opd_waves": 7.94
+  },
+  "coherence_length_mm_1GHz": 299.792458
+}

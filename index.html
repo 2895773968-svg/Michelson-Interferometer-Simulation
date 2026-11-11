@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>迈克尔逊干涉仪计量系统建模与波前分析 · Michelson Interferometer Modeling &amp; Wavefront Analysis</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --bg-soft:#f6f8fa;
+  --bg-code:#f6f8fa;
+  --ink:#1f2328;
+  --ink-2:#3d444d;
+  --muted:#59636e;
+  --line:#d1d9e0;
+  --line-soft:#eaeef2;
+  --accent:#0969da;
+  --accent-soft:#ddf4ff;
+  --navy:#0b1f33;
+  --amber:#9a6700;
+  --amber-bg:#fff8c5;
+  --radius:8px;
+  --mono:ui-monospace,SFMono-Regular,"Cascadia Code","Consolas","Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:15.5px;line-height:1.75;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+.wrap{max-width:940px;margin:0 auto;padding:0 28px 96px}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:40;
+  background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(10px);
+  border-bottom:1px solid var(--line-soft);
+}
+.nav-in{max-width:940px;margin:0 auto;padding:10px 28px;display:flex;align-items:center;gap:22px}
+.nav-mark{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--navy);font-weight:600;white-space:nowrap}
+.nav-mark span{color:var(--accent)}
+.nav-links{display:flex;gap:18px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{
+  font-size:12.5px;color:var(--muted);text-decoration:none;letter-spacing:.02em;
+  padding:3px 0;border-bottom:1px solid transparent;transition:.16s;
+}
+.nav-links a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ---------- cover ---------- */
+.cover{padding:72px 0 40px;border-bottom:1px solid var(--line-soft)}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:22px;
+}
+h1{
+  font-size:36px;line-height:1.34;letter-spacing:-.01em;font-weight:650;
+  margin:0 0 10px;color:var(--navy);
+}
+h1 small{display:block;font-size:16.5px;font-weight:400;letter-spacing:.01em;color:var(--muted);margin-top:14px;line-height:1.6}
+.cover-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}
+.chip{
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-2);
+  border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:#fff;
+}
+.chip b{color:var(--accent);font-weight:600}
+.spec-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:34px;
+  background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;
+}
+.spec{background:#fff;padding:16px 18px}
+.spec dt{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.spec dd{margin:0;font-size:19px;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+.spec dd em{font-style:normal;font-size:12px;font-weight:400;color:var(--muted);margin-left:3px}
+
+/* ---------- headings ---------- */
+h2{
+  font-size:23px;font-weight:640;color:var(--navy);margin:0 0 6px;letter-spacing:-.005em;
+  display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+}
+h2 .num{
+  font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);
+  border:1px solid var(--line);border-radius:5px;padding:1px 7px;letter-spacing:.06em;
+  transform:translateY(-3px);
+}
+h2 .en{font-size:13px;font-weight:400;color:var(--muted);letter-spacing:.01em}
+section{padding:52px 0 8px;border-bottom:1px solid var(--line-soft)}
+section:last-of-type{border-bottom:none}
+h3{font-size:16px;font-weight:640;color:var(--ink);margin:34px 0 10px;letter-spacing:.005em}
+h3 .en{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:8px}
+.lede{
+  color:var(--muted);font-size:13.5px;line-height:1.7;margin:0 0 22px;
+  padding-left:14px;border-left:2px solid var(--line);
+}
+p{margin:12px 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(9,105,218,.28)}
+code{font-family:var(--mono);font-size:12.8px;background:var(--bg-code);border:1px solid var(--line-soft);border-radius:4px;padding:1px 5px}
+strong{font-weight:640;color:var(--navy)}
+
+/* ---------- abstract & callout ---------- */
+.abstract{
+  border:1px solid var(--line);border-radius:var(--radius);padding:26px 28px;background:#fff;
+  margin:44px 0 0;
+}
+.abstract .tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:12px;
+}
+.abstract p{margin:0 0 14px;font-size:14.5px}
+.abstract p:last-child{margin-bottom:0}
+.abstract .en{color:var(--ink-2);font-size:13.8px;line-height:1.72}
+.disclaimer{
+  margin-top:14px;background:var(--amber-bg);border:1px solid #eac54f;border-left:4px solid var(--amber);
+  border-radius:var(--radius);padding:16px 20px;
+}
+.disclaimer .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:600;margin-bottom:6px}
+.disclaimer p{margin:0;font-size:13.5px;line-height:1.68;color:#4a3c00}
+
+/* ---------- tables ---------- */
+.tbl-wrap{overflow-x:auto;margin:20px 0 8px;border:1px solid var(--line);border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;font-size:13.2px;background:#fff}
+thead th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);background:var(--bg-soft);font-weight:600;
+  padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+thead th .zh{display:block;font-family:var(--sans);font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--ink-2);font-weight:600;margin-top:2px}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top;line-height:1.6}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even){background:#fcfcfd}
+td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl-note{font-size:12px;color:var(--muted);margin:8px 0 0}
+
+/* ---------- formulas ---------- */
+.eq{
+  position:relative;background:var(--bg-soft);border:1px solid var(--line-soft);border-left:3px solid var(--accent);
+  border-radius:var(--radius);padding:16px 60px 16px 20px;margin:16px 0;
+  font-family:var(--mono);font-size:14px;line-height:1.9;overflow-x:auto;
+}
+.eq .tag{position:absolute;right:16px;top:14px;font-size:10.5px;color:var(--muted);letter-spacing:.06em;white-space:nowrap}
+.eq .lbl{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-bottom:4px}
+.eq em{font-style:italic}
+.eq .sub{font-size:11.5px}
+
+/* ---------- figures ---------- */
+figure{margin:26px 0;padding:0}
+figure img{width:100%;display:block;border:1px solid var(--line);border-radius:6px;background:#000}
+figcaption{
+  margin-top:10px;font-size:12.4px;color:var(--muted);line-height:1.66;
+}
+figcaption .fig-no{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;margin-right:8px;
+}
+figcaption .en{display:block;color:#6e7781;font-size:11.8px;margin-top:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:24px 0}
+.grid2 figure{margin:0}
+
+/* ---------- kpi strip ---------- */
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;margin:24px 0 6px}
+.kpi div{background:#fff;padding:14px 16px}
+.kpi dt{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.kpi dd{margin:0;font-size:17px;font-weight:640;color:var(--navy);font-variant-numeric:tabular-nums}
+.kpi dd small{font-size:11px;font-weight:400;color:var(--muted)}
+
+/* ---------- steps ---------- */
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:18px 0}
+ol.steps li{counter-increment:s;position:relative;padding-left:38px;margin:0 0 14px;font-size:14px;line-height:1.7}
+ol.steps li::before{
+  content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;
+  font-family:var(--mono);font-size:10.5px;color:var(--accent);font-weight:600;
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px;background:#fff;
+}
+ul.plain{margin:12px 0;padding-left:20px}
+ul.plain li{margin:7px 0;font-size:14px;line-height:1.7}
+
+/* ---------- code ---------- */
+pre{
+  background:#0d1117;color:#e6edf3;border-radius:var(--radius);padding:18px 20px;overflow-x:auto;
+  font-family:var(--mono);font-size:12.4px;line-height:1.75;margin:18px 0;border:1px solid #1f242c;
+}
+pre .c{color:#8b949e}
+pre .k{color:#ffa657}
+pre .s{color:#a5d6ff}
+
+/* ---------- footer ---------- */
+footer{margin-top:56px;padding-top:26px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--muted);line-height:1.8}
+footer .mono{font-family:var(--mono);font-size:11px;letter-spacing:.04em}
+
+@media (max-width:760px){
+  .spec-grid,.kpi{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+  h1{font-size:27px}
+  .wrap{padding:0 18px 64px}
+  .nav-links{display:none}
+}
+
+/* ============================================================
+   PRINT / PDF  —  Ctrl+P safety net
+   ============================================================ */
+@page{ size:A4; margin:14mm 12mm; }
+@media print{
+  html,body{background:#fff;font-size:10.6pt;line-height:1.6}
+  nav{display:none!important}
+  .wrap{max-width:none;padding:0;margin:0}
+  a{color:var(--ink);border-bottom:none}
+  section{padding-top:26px;border-bottom:none}
+
+  /* --- keep atomic blocks together --- */
+  figure, figcaption, img,
+  table, thead, tbody, tr,
+  .eq, .abstract, .disclaimer, .kpi, .spec-grid, .grid2,
+  .tbl-wrap, ol.steps li, pre, .card{
+    page-break-inside:avoid!important;
+    break-inside:avoid!important;
+  }
+  figure, .eq, .tbl-wrap, .disclaimer, .kpi, .abstract{ page-break-inside:avoid!important; }
+  img{ max-width:100%!important; height:auto!important; }
+  h1,h2,h3{ page-break-after:avoid; break-after:avoid; }
+  h2{ page-break-before:auto }
+  section{ page-break-inside:auto }
+
+  /* start each major chapter on a fresh page (except the first) */
+  section + section{ page-break-before:always; }
+  .cover, .abstract, .disclaimer{ page-break-inside:avoid!important; }
+
+  /* full-bleed dark code block still prints legibly */
+  pre{ background:#f6f8fa;color:#1f2328;border:1px solid #d1d9e0 }
+  pre .c{color:#57606a} pre .k{color:#953800} pre .s{color:#0a3069}
+  .grid2{ grid-template-columns:1fr 1fr }
+  .kpi,.spec-grid{ grid-template-columns:repeat(4,1fr) }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <div class="nav-mark">MICHELSON <span>/</span> METROLOGY</div>
+    <div class="nav-links">
+      <a href="#abstract">摘要 ABSTRACT</a>
+      <a href="#ch1">01 指标 SPEC</a>
+      <a href="#ch2">02 仿真 SIMULATION</a>
+      <a href="#ch3">03 ZEMAX</a>
+      <a href="#ch4">04 公差 TOLERANCE</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div class="eyebrow">Optical Metrology · Interferometer Simulation Report · 2026</div>
+  <h1>
+    迈克尔逊干涉仪计量系统建模与波前分析
+    <small>Michelson Interferometer Modeling &amp; Wavefront Analysis<br>
+    A dual-track study: Python physical simulation + Zemax sequential / non-sequential engineering workflow</small>
+  </h1>
+  <div class="cover-meta">
+    <span class="chip">He–Ne <b>632.8 nm</b></span>
+    <span class="chip">Clear aperture <b>8 mm</b></span>
+    <span class="chip">Travel <b>±0.2 mm</b></span>
+    <span class="chip">Wavefront <b>RMS &lt; λ/20</b></span>
+    <span class="chip">Visibility <b>&gt; 0.8</b></span>
+  </div>
+
+  <dl class="spec-grid">
+    <div class="spec"><dt>Wavelength / 波长</dt><dd>632.8<em>nm</em></dd></div>
+    <div class="spec"><dt>Aperture / 口径</dt><dd>8<em>mm</em></dd></div>
+    <div class="spec"><dt>Fringe spacing / 条纹间距</dt><dd>0.80<em>mm</em></dd></div>
+    <div class="spec"><dt>Measured visibility / 实测对比度</dt><dd>0.879<em>&nbsp;/ 0.80</em></dd></div>
+  </dl>
+</header>
+
+<!-- ============ ABSTRACT ============ -->
+<section id="abstract" style="border-bottom:none;padding-top:36px">
+  <div class="abstract">
+    <span class="tag">Abstract · 摘要</span>
+    <p class="en">
+      This report closes the loop from specification to executable model for a Michelson
+      interferometer used as a wavefront-metrology instrument: 632.8 nm He–Ne source, 8 mm clear
+      aperture, a reference arm fixed and a test arm travelling ±0.2 mm, with targets of
+      λ/20 RMS wavefront and interferometric visibility above 0.8. Two tracks run in parallel.
+      The physical track (<b>Python / NumPy</b>) synthesises CCD-realistic interferograms from first
+      principles — Gaussian envelope, soft-edged stop, Poisson shot noise, read noise and 8-bit
+      quantisation — so that every fringe pattern in this document is a computed result rather than
+      an illustration. The engineering track specifies how the same instrument is built and
+      diagnosed in <b>Zemax OpticStudio</b>: sequential ray tracing of each arm for exit-pupil OPD,
+      a merit function built on the <i>difference</i> between the two arms' Zernike coefficients, and
+      a non-sequential coherent-irradiance detector for the real fringe field.
+    </p>
+    <p>
+      本报告针对一台用于波前计量的迈克尔逊干涉仪，给出从指标到可执行模型的完整闭环：He–Ne 632.8 nm 光源、
+      8 mm 通光口径、参考臂固定而测试臂可位移 ±0.2 mm，指标为波前 RMS &lt; λ/20、条纹对比度 &gt; 0.8。
+      全文双线并行：<b>物理仿真线</b>用 Python 从第一性原理生成具备 CCD 真实感的干涉图（高斯包络、软边光阑、
+      泊松散粒噪声、读出噪声、8 bit 量化），文中每一张条纹图都是计算结果而非示意图；<b>工程实施线</b>给出
+      该仪器在 Zemax OpticStudio 中的建模、优化与排查路径——序列模式分臂提取出瞳 OPD，评价函数以两臂
+      Zernike 系数之差为目标，非序列模式用相干辐照度探测器还原真实条纹场。
+    </p>
+    <p>
+      所有结论均标注依据：几何光路、光程差、相干长度、偏振与膜层、探测器采样。凡涉及 Zemax 菜单名、
+      操作数或版本相关功能，均提示需按实际版本确认。
+    </p>
+  </div>
+
+  <div class="disclaimer">
+    <div class="t">Disclaimer · 免责声明</div>
+    <p>
+      <b>本报告基于无 Zemax 授权的环境完成。</b>所有干涉条纹图、强度剖面与对比度数据，均由 Python（NumPy /
+      Matplotlib）按公开光学原理进行真实物理仿真生成，可直接复现、可校验；Zemax 相关章节为<b>工程理论指导</b>，
+      基于公开的建模范式与操作逻辑撰写，<b>不包含任何实际软件运行截图、导出数据或优化结果</b>。文中提及的
+      菜单路径、操作数名称与探测器设置项，可能随 OpticStudio 版本及授权等级不同而变化，实施时<b>需按你的版本确认</b>。
+      <span style="display:block;margin-top:8px;opacity:.85">
+      This report was produced in an environment <b>without a Zemax license</b>. Every interferogram,
+      intensity profile and visibility value is a genuine physical simulation computed in Python and is
+      fully reproducible; the Zemax chapters are <b>engineering guidance</b> derived from public modeling
+      practice and contain <b>no screenshots, exports or optimisation results from the software</b>.
+      Menu paths, operand names and detector settings must be verified against your OpticStudio version.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ============ CH 1 ============ -->
+<section id="ch1">
+  <h2><span class="num">01</span>设计指标与理论公式<span class="en">Specifications &amp; Governing Equations</span></h2>
+  <p class="lede">
+    Design targets, the four equations that govern the fringe field, and the division of labour
+    between sequential and non-sequential modeling. 指标、支配条纹场的四个公式，以及序列与非序列模式的分工边界。
+  </p>
+
+  <h3>1.1 设计指标 <span class="en">Design targets</span></h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:26%">Parameter<span class="zh">参数</span></th>
+      <th style="width:30%">Value<span class="zh">取值</span></th>
+      <th>Engineering meaning<span class="zh">工程含义</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>Wavelength 波长</td><td class="num">632.8 nm (He–Ne)</td><td>单色、高相干；相干长度由纵模结构决定，见 §4.1</td></tr>
+      <tr><td>Clear aperture 通光口径</td><td class="num">8 mm</td><td>决定可测区域与条纹数上限；高斯 1/e² 直径取 8 mm</td></tr>
+      <tr><td>Reference arm 参考臂</td><td class="num">fixed</td><td>长度稳定，作为相位基准</td></tr>
+      <tr><td>Test arm travel 测试臂行程</td><td class="num">±0.2 mm</td><td>对应 OPD 变化 ±0.4 mm ≈ ±632 个干涉级次，见 §4.2</td></tr>
+      <tr><td>Wavefront error 波前误差</td><td class="num">RMS &lt; λ/20 = 31.6 nm</td><td>装调完成后两臂残余波前之差的上限（不含可扣除的倾斜/离焦）</td></tr>
+      <tr><td>Fringe visibility 条纹对比度</td><td class="num">V &gt; 0.8</td><td>相干性、偏振、分束比、像差、探测器共同决定，见 §4.4</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>1.2 支配条纹场的四个公式 <span class="en">Four governing equations</span></h3>
+
+  <div class="eq">
+    <span class="lbl">两光束相干叠加 / Two-beam coherent superposition</span>
+    I(x,y) = I<sub>1</sub> + I<sub>2</sub> + 2√(I<sub>1</sub>I<sub>2</sub>)·|γ|·cos(2π·OPD/λ)
+    <span class="tag">(1)</span>
+  </div>
+  <p>
+    其中 |γ| 为复相干度（由光源谱宽、偏振态、臂长差共同决定），Γ = 2√(I₁I₂)/(I₁+I₂) 为分束比因子。
+    实际可观测的对比度是二者的乘积：<b>V = |γ|·Γ</b>。这就是后面 §4.4 对比度预算表的物理基础。
+  </p>
+
+  <div class="eq">
+    <span class="lbl">倾斜：线性 OPD 斜坡 → 等厚直条纹 / Tilt → equal-thickness fringes</span>
+    OPD(x′) = 2α·x′&nbsp;&nbsp;⟹&nbsp;&nbsp;d = λ / (2α)&nbsp;,&nbsp;&nbsp;N = 2α·D / λ
+    <span class="tag">(2)</span>
+  </div>
+  <p>
+    α 为两臂回光波前之间的夹角（镜像倾斜量的两倍，若镜面倾斜 β，则波前夹角为 2β）。条纹方向<b>垂直于倾斜轴</b>，
+    间距 d 与倾角成反比。本报告取 N = 10 条跨 8 mm → d = 0.80 mm → α = 395.5 µrad = 81.6″。
+  </p>
+
+  <div class="eq">
+    <span class="lbl">离焦 / 臂长失配：等倾圆环 / Defocus &amp; arm detune → equal-inclination rings</span>
+    OPD(i) = 2ΔL·cos i&nbsp;,&nbsp;&nbsp;tan i = r / f&nbsp;⟹&nbsp;&nbsp;m(r) = 2ΔL·cos i / λ
+    <span class="tag">(3)</span>
+  </div>
+  <p>
+    ΔL 为两臂光程差，f 为干涉仪后成像镜焦距，r 为探测器上的径向坐标。级次 m(r) 随 r 单调下降，
+    因此圆环<b>向外侧变密</b>（二阶导不为零）。当 ΔL → 0 时整场趋于同一级次，圆环扩张成一片单色视场——
+    条纹对比度看似很好，但对相位<b>完全不敏感</b>，这是最容易被误判为"系统正常"的失效模式。
+  </p>
+
+  <div class="eq">
+    <span class="lbl">相干长度 / Coherence length</span>
+    L<sub>c</sub> = c / Δν = λ² / Δλ&nbsp;&nbsp;⟹&nbsp;&nbsp;V ∝ exp(−|OPD| / L<sub>c</sub>)
+    <span class="tag">(4)</span>
+  </div>
+  <p>
+    振镜扫描或臂长漂移使 OPD 增大时，对比度按指数衰减。对 OPD 预算而言，工程判据是
+    <b>|OPD|<sub>max</sub> ≤ L<sub>c</sub>/10</b>，此时相干性引入的对比度损失小于 10%。
+  </p>
+
+  <h3>1.3 双模式分工边界 <span class="en">Sequential vs. non-sequential: what each mode can and cannot do</span></h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:22%">Mode<span class="zh">模式</span></th>
+      <th style="width:34%">Produces<span class="zh">能产出</span></th>
+      <th>Does NOT produce<span class="zh">不能产出</span></th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Sequential</strong><br>序列模式</td>
+        <td>逐臂的出瞳波前图、OPD Fan、Zernike 系数、近轴/实际光线追迹、优化变量与评价函数</td>
+        <td><b>不能</b>直接生成完整干涉条纹；两条独立光路在同一 LDE 中不构成真实相干叠加</td>
+      </tr>
+      <tr>
+        <td><strong>Non-sequential</strong><br>非序列 NSC</td>
+        <td>完整物理光路、光线分裂、偏振追迹、相干辐照度探测器上的真实条纹场、鬼像与杂散光</td>
+        <td>不适合做高阶像差的解析优化；计算量大、对光线数与相干设置敏感</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tbl-note">定量相位分析优先走 NSC；波前优化与公差反演优先走序列。两者不是替代关系，而是前后道工序。</p>
+</section>
+
+<!-- ============ CH 2 ============ -->
+<section id="ch2">
+  <h2><span class="num">02</span>Python 物理仿真<span class="en">Physical Simulation of the Fringe Field</span></h2>
+  <p class="lede">
+    Every image below is computed from Eq. (1)–(3) on a 2048² grid (4.88 µm/pixel) and then degraded by a
+    detector model, so it behaves like a real CCD frame — including noise you cannot remove by averaging a
+    single shot. 全部由公式计算后经探测器模型退化，具备真实 CCD 帧的行为。
+  </p>
+
+  <div class="kpi">
+    <div><dt>Grid / 采样</dt><dd>2048² <small>px</small></dd></div>
+    <div><dt>Pixel pitch / 像元</dt><dd>4.88 <small>µm</small></dd></div>
+    <div><dt>Well depth / 满阱</dt><dd>9 000 <small>e⁻</small></dd></div>
+    <div><dt>Quantisation / 量化</dt><dd>8 <small>bit</small></dd></div>
+  </div>
+
+  <h3>2.1 仿真模型 <span class="en">Model chain</span></h3>
+  <ol class="steps">
+    <li><b>光场</b>：8 mm 口径内的高斯光束，1/e² 直径为 8 mm（w = 4 mm），外缘由 tanh 软边光阑（过渡宽 20 µm）截断——真实光阑不会产生数学上的硬边。</li>
+    <li><b>相位</b>：按式 (2) 或式 (3) 计算 OPD 图，乘以 2π/λ 得到相位；含 0.15λ 的活塞项（模拟零级次偏离整数）。</li>
+    <li><b>相干叠加</b>：I = ½·env·stop·[1 + V·cos φ] + I<sub>bg</sub>，V 为给定对比度预算，I<sub>bg</sub> = 1.2% 模拟杂散光本底。</li>
+    <li><b>探测器</b>：换算为电子数 → 泊松散粒噪声 → 8 e⁻ 读出噪声 → 25 e⁻ 暗电流 → 满阱截断 → 8 bit 量化。</li>
+    <li><b>自检</b>：从渲染后的图像反算对比度（取中心区域的 0.5% / 99.5% 分位），与设定值交叉验证。</li>
+  </ol>
+
+  <h3>2.2 倾斜：等厚直条纹 <span class="en">Tilt — equal-thickness fringes</span></h3>
+  <figure>
+    <img src="assets/interferogram_tilt_gray.jpg" alt="Tilt interferogram, 10 straight fringes across an 8 mm aperture">
+    <figcaption>
+      <span class="fig-no">Fig. 2.1</span>
+      倾斜波前误差下的等厚直条纹：10 条跨 8 mm，间距 0.800 mm，等效镜面倾斜 81.6″，实测对比度 0.879（目标 &gt; 0.80）。
+      可见条纹在光斑边缘被高斯包络压低，中心亮区仍保持清晰的正弦强度分布。
+      <span class="en">Equal-thickness fringes under a linear OPD ramp: 10 fringes / 8 mm, spacing 0.800 mm, mirror tilt 81.6″,
+      measured visibility 0.879. The Gaussian envelope suppresses fringe contrast toward the rim — the signal-to-noise
+      ratio is therefore always best near the axis.</span>
+    </figcaption>
+  </figure>
+  <p>
+    <b>为什么是直的：</b>OPD 只沿一个方向线性变化（等厚线是平行直线），因此同一级次的轨迹就是垂直于倾斜轴的直线。
+    <b>方向的意义：</b>条纹的旋转角直接读出倾斜轴的方向——转动镜子绕 x 轴，条纹绕 y 轴排列，这是装调时"先定轴、再定角"的依据。
+    <b>间距的意义：</b>d = λ/(2α)，间距反比于倾角；把 0.8 mm 换成 164 像素，说明这套采样对倾角的灵敏度约为每像素 0.5″量级，
+    因此 81.6″ 的失调在图像上一目了然。
+  </p>
+
+  <h3>2.3 离焦 / 臂长失配：等倾圆环 <span class="en">Defocus &amp; arm detune — equal-inclination rings</span></h3>
+  <figure>
+    <img src="assets/interferogram_rings_gray.jpg" alt="Equal-inclination circular rings from 0.2 mm arm detune">
+    <figcaption>
+      <span class="fig-no">Fig. 2.2</span>
+      臂长失配 ΔL = 0.200 mm、成像镜 f = 25 mm 时的等倾圆环：中心干涉级 632.1，孔径边缘 624.2，半径 4 mm 内共 7.94 个环。
+      环向外侧变密，符合式 (3) 的余弦型 OPD；中心亮度未达峰值（632.11 非整数级次），为真实的相位偏置。
+      <span class="en">Rings for ΔL = 0.200 mm with a 25 mm imaging lens: order 632.1 at centre, 624.2 at the aperture edge,
+      7.94 rings over the 4 mm radius. Ring spacing tightens outward because OPD follows cos i, not a paraboloid.</span>
+    </figcaption>
+  </figure>
+  <p>
+    <b>为什么是圆的：</b>若光源为扩展源或存在发散角，OPD 只依赖观察角 i，等倾线是同心圆。
+    <b>环数的意义：</b>环数 = 2ΔL(1−cos i<sub>max</sub>)/λ，直接正比于 ΔL——因此数环即可粗测臂长差，这是最古老也最实用的自检手段。
+    <b>危险区：</b>当 ΔL 降到几十微米，环数降到 1～2 个，视场几乎单色；此时"条纹很干净"并不代表系统良好，
+    恰恰说明相位灵敏度已经丢失，必须先把 ΔL 偏置到几个环的工作点再测量。
+  </p>
+
+  <div class="grid2">
+    <figure>
+      <img src="assets/interferogram_tilt_rainbow.jpg" alt="Rainbow (turbo) colormap of the tilt interferogram">
+      <figcaption><span class="fig-no">Fig. 2.3a</span> 倾斜条纹的 turbo 彩虹映射：伪彩放大局部强度梯度，便于目视检查条纹是否等间距（等间距 ⇔ 纯倾斜，无高阶像差）。<span class="en">Turbo colormap of the tilt field — equal spacing indicates a pure tilt term.</span></figcaption>
+    </figure>
+    <figure>
+      <img src="assets/interferogram_rings_rainbow.jpg" alt="Rainbow (turbo) colormap of the ring interferogram">
+      <figcaption><span class="fig-no">Fig. 2.3b</span> 圆环的 turbo 映射：可清楚看到环径随级次收缩（Airy 型非均匀），以及中心相位偏置导致的非对称亮度。<span class="en">Turbo colormap of the ring field — non-uniform ring radii and the off-peak centre are both visible.</span></figcaption>
+    </figure>
+  </div>
+
+  <h3>2.4 定量自检 <span class="en">Quantitative self-check</span></h3>
+  <figure>
+    <img src="assets/fig_analysis_panel.jpg" alt="2x2 analysis panel: fringe image, row profile, ring image, radial profile">
+    <figcaption>
+      <span class="fig-no">Fig. 2.4</span>
+      分析面板：(a) 条纹图与 (b) 中心行强度剖面；(c) 圆环图与 (d) 方位平均径向剖面。
+      剖面上的噪声起伏来自泊松统计，峰值高度差异来自高斯包络——这正是从真实干涉图提取相位时必须先做包络归一化的原因。
+      <span class="en">Analysis panel: (a)(c) fringe fields, (b) central-row profile, (d) azimuthally averaged radial profile.
+      Amplitude modulation across the profile is the Gaussian envelope; the jitter is Poisson noise.</span>
+    </figcaption>
+  </figure>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:34%">Metric<span class="zh">指标</span></th>
+      <th class="num" style="width:22%">Tilt case<span class="zh">倾斜</span></th>
+      <th class="num" style="width:22%">Detune case<span class="zh">失配</span></th>
+      <th>Target<span class="zh">目标</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>Fringe / ring count 条纹（环）数</td><td class="num">10.0</td><td class="num">7.94</td><td>由失调量决定，非指标</td></tr>
+      <tr><td>Spacing 间距</td><td class="num">0.800 mm</td><td class="num">0.256 mm @ edge</td><td>≥ 6 px 以满足 Nyquist</td></tr>
+      <tr><td>PV OPD across aperture 孔径内 PV</td><td class="num">10.0 λ</td><td class="num">7.9 λ</td><td>失调量，非设计残差</td></tr>
+      <tr><td>Wavefront RMS 波前 RMS</td><td class="num">2.50 λ</td><td class="num">2.29 λ</td><td>&lt; 0.05 λ（装调后）</td></tr>
+      <tr><td>Measured visibility 实测对比度</td><td class="num">0.879</td><td class="num">0.863</td><td>&gt; 0.80 ✔</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tbl-note">
+    注意：表中 RMS 由<b>人为引入的失调</b>主导（倾斜/失配属于可通过装调扣除的低阶项），与指标 λ/20 不矛盾。λ/20 约束的是
+    装调完成后剩余的<b>高阶残差</b>，其量级比这里小两个数量级。
+  </p>
+
+  <h3>2.5 复现 <span class="en">Reproduce</span></h3>
+<pre><span class="c"># Python 3.13 · numpy 2.5 · matplotlib 3.11</span>
+<span class="k">python</span> michelson_sim/michelson_fringe_sim.py
+<span class="c"># -> outputs/interferogram_tilt_gray.png     2048 x 2048, 8-bit</span>
+<span class="c"># -> outputs/interferogram_rings_gray.png</span>
+<span class="c"># -> outputs/interferogram_*_rainbow.png     turbo colormap</span>
+<span class="c"># -> outputs/fig_analysis_panel.png</span>
+<span class="c"># -> outputs/metrics.json                     all numbers in this report</span></pre>
+</section>
+
+<!-- ============ CH 3 ============ -->
+<section id="ch3">
+  <h2><span class="num">03</span>Zemax 双模式工程实操<span class="en">Sequential &amp; Non-Sequential Workflow</span></h2>
+  <p class="lede">
+    Order of operations matters: geometry first, then optical-path matching, then wavefront, and only then
+    fringes, tolerance and stray light. 先几何重合，再光程匹配，再波前优化，最后做条纹、公差与杂散光。
+  </p>
+
+  <h3>3.1 序列模式：分臂 LDE 配置 <span class="en">Sequential mode — per-arm lens data</span></h3>
+  <p>
+    两臂<b>各自建一个文件</b>（或用多重结构 CONF 隔离），保证每条光路都是"单向、单调"的序列光路，
+    这样出瞳波前才有明确的物理含义。单位统一 mm，波长表加 632.8 nm 并设为主波长。
+  </p>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th class="num" style="width:8%">Surf</th>
+      <th style="width:16%">Type<span class="zh">面型</span></th>
+      <th style="width:14%">Material<span class="zh">材料</span></th>
+      <th class="num" style="width:14%">Radius<span class="zh">曲率半径</span></th>
+      <th class="num" style="width:14%">Thickness<span class="zh">厚度</span></th>
+      <th>Note<span class="zh">说明</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="num">OBJ</td><td>Standard</td><td>—</td><td class="num">Infinity</td><td class="num">Infinity</td><td>无穷远物（准直入射）</td></tr>
+      <tr><td class="num">1</td><td>Standard</td><td>—</td><td class="num">Infinity</td><td class="num">10.0</td><td><b>孔径光阑</b>，半口径 4 mm（Aperture = Entrance Pupil Diameter 8 mm）</td></tr>
+      <tr><td class="num">2</td><td>Standard</td><td>BK7 <span style="color:var(--muted)">(or air)</span></td><td class="num">Infinity</td><td class="num">10.0</td><td>分束立方前表面；若用平板分束镜则倾斜 45° 建面</td></tr>
+      <tr><td class="num">3</td><td>Standard</td><td>BK7</td><td class="num">Infinity</td><td class="num">L<sub>arm</sub></td><td>立方厚度 + 臂长；<b>测试臂此层设为变量</b>（±0.2 mm 扫描）</td></tr>
+      <tr><td class="num">4</td><td>Standard</td><td>MIRROR</td><td class="num">Infinity</td><td class="num">—</td><td>参考镜；测试臂替换为被测面（球面时 Radius 设变量 + TIRR）</td></tr>
+      <tr><td class="num">5</td><td>Coordinate Break</td><td>—</td><td class="num">—</td><td class="num">0</td><td><b>倾斜变量</b>：Tilt About X / Y，用于模拟装调残余（单位度）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tbl-note">
+    关键点：把"装调误差"显式建成 <code>Coordinate Break</code> 的自由度，而不是事后手改数值——这样同一套模型既能做优化，也能直接做公差分析。
+  </p>
+
+  <h3>3.2 评价函数：以两臂 OPD 差为目标 <span class="en">Merit function on the inter-arm OPD difference</span></h3>
+  <p>
+    核心思想：<b>不要试图在同一条光路里同时优化两个臂</b>。正确做法是分别用相同的光瞳采样提取两臂的 Zernike 系数，
+    再对<b>系数之差</b>施约束。这样优化器不会被"两臂共同的低阶项"（可扣除项）带偏。
+  </p>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:20%">Operand<span class="zh">操作数</span></th>
+      <th style="width:26%">Definition<span class="zh">定义</span></th>
+      <th class="num" style="width:16%">Target<span class="zh">目标</span></th>
+      <th>Role<span class="zh">作用</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td><code>ZERN</code></td><td>Zernike 系数（Term j，采样 ≥ 7 环）</td><td class="num">—</td><td>逐臂提取前 9 项（piston…primary astig/trefoil）</td></tr>
+      <tr><td><code>DIFF</code></td><td>两操作数之差（跨 CONF 或跨文件）</td><td class="num">0</td><td><b>核心项</b>：约束 |ΔZ<sub>j</sub>| → 0，权重 1</td></tr>
+      <tr><td><code>RSCE</code></td><td>RMS 波前差（相对于参考球面）</td><td class="num">0.05 λ</td><td>把单臂残差压到 λ/20 以内</td></tr>
+      <tr><td><code>REAY</code></td><td>像面/出瞳处光线高度</td><td class="num">0</td><td>保证两臂回光在探测器上共心（几何重合先于相位）</td></tr>
+      <tr><td><code>CONF</code></td><td>多重结构（Configuration）</td><td class="num">—</td><td>同一文件内切换两臂，便于 DIFF 直接比较</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul class="plain">
+    <li><b>变量集</b>：被测面 Radius（球面时）、臂长补偿厚度、透镜间隔；<b>倾斜不作为优化变量</b>——它应由镜架装调修正，留在优化里会掩盖真实的机械问题。</li>
+    <li><b>权重策略</b>：ΔZ<sub>4~6</sub>（离焦/像散）权重 1；ΔZ<sub>7~9</sub>（彗差/三叶）权重 2；piston 与 tilt 权重 0（可扣除项，不参与评价）。</li>
+    <li><b>验收</b>：两臂出瞳 OPD 的 PV 差 &lt; 0.1 λ，RMS 差 &lt; 0.03 λ，且 Zernike 差值表中无单项超过 0.02 λ。</li>
+  </ul>
+
+  <h3>3.3 非序列模式：相干探测器设置 <span class="en">NSC — coherent detector stack</span></h3>
+  <ol class="steps">
+    <li><b>光源</b>：<code>Source Ray</code> 或 <code>Source Diode</code>，单色 0.6328 µm，准直后口径 8 mm；<b>必须为相干源</b>（相干计算不接受随机相位光源）。</li>
+    <li><b>光路</b>：分束立方（两个 45° 面 + <code>COATING</code> 50/50）→ 两臂反射镜 → 回程 → 出射；探测器前加 f = 25 mm 成像镜以复现 §2.3 的等倾环。</li>
+    <li><b>全局开关</b>：<code>NSC Editor → Ray Splitting</code> 开启，<code>Polarization</code> 追迹开启，<code>Minimum Relative Ray Intensity</code> ≈ 1e-4；<b>光线相位追迹必须打开</b>，否则相干求和退化为强度叠加。</li>
+    <li><b>光线数</b>：分析光线 ≥ 5×10⁵（分裂后自动翻倍）。条纹噪声大时<b>优先加光线数</b>，不要用平滑——平滑会吃掉真实的高频相位信息。</li>
+    <li><b>探测器</b>：<code>Detector Rectangle</code>，10 × 10 mm，≥ 512 × 512 像素，置于焦面附近；切换为<b>相干辐照度</b>模式（选项名称与位置随版本不同，<b>需按你的版本确认</b>）。</li>
+    <li><b>判读顺序</b>：先看非相干辐照度验证能量守恒与光斑位置 → 再切相干看条纹 → 最后用 <code>Detector Viewer</code> 的行/列剖面量对比度与间距。</li>
+  </ol>
+
+  <h3>3.4 故障排查表 <span class="en">Symptom → cause → check → fix</span></h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:24%">Symptom<span class="zh">现象</span></th>
+      <th style="width:24%">Likely cause<span class="zh">可能原因</span></th>
+      <th style="width:26%">Check<span class="zh">检查</span></th>
+      <th>Fix<span class="zh">修正</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>探测器上完全无条纹，只有均匀亮斑</td><td>相干求和未开启 / OPD 超出相干长度 / 两臂光斑未重合</td><td>查 NSC 光线相位开关；算 2ΔL 与 L<sub>c</sub>；看非相干辐照度的光斑质心</td><td>开相位追迹；把 ΔL 拉回 L<sub>c</sub>/10 内；用 <code>REAY</code> 先做几何重合</td></tr>
+      <tr><td>有条纹但对比度远低于 0.8</td><td>分束比失衡、偏振态正交、膜层相位不匹配</td><td>读每臂回光能量比；查偏振追迹后的 Jones 矢量</td><td>把膜层改为 50/50；在臂内加 λ/2 片或旋转偏振；检查镀膜相位差</td></tr>
+      <tr><td>条纹数对不上（应为 10 条却是 3 条）</td><td>倾角单位错（度 vs 弧度）、镜像倾斜未乘 2</td><td>用 d = λ/(2α) 反算，与模型输入对照</td><td>统一单位；记住镜倾 β → 波前夹角 2β</td></tr>
+      <tr><td>条纹边缘出现锯齿 / 摩尔纹</td><td>探测器像素不足（每条纹 &lt; 4 px）</td><td>条纹间距 ÷ 像元尺寸</td><td>加像素数或缩短成像镜焦距；本报告 0.8 mm / 4.88 µm = 164 px，安全</td></tr>
+      <tr><td>圆环中心一片均匀、数不出环</td><td>ΔL 接近 0，相位灵敏度丢失</td><td>估 m<sub>center</sub> = 2ΔL/λ，若 &lt; 5 则有风险</td><td>把 ΔL 偏置到 5～10 个环的工作点再测</td></tr>
+      <tr><td>序列模式波前很好，NSC 条纹却很差</td><td>序列未包含分束镜面形/膜层，NSC 引入了额外像差</td><td>对比两臂 Zernike 差值；查立方面形与胶层</td><td>在序列中加等效面形；或把立方作为已知误差项计入预算</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="disclaimer" style="background:var(--accent-soft);border-color:#54aeff;border-left-color:var(--accent)">
+    <div class="t" style="color:var(--accent)">Version note · 版本差异</div>
+    <p style="color:#0a3069">
+      Zemax OpticStudio 的 NSC 相干探测能力、Zernike 采样设置、多重结构跨 CONF 操作数，在 Standard / Professional /
+      Premium 授权与不同版本之间<b>存在差异</b>：部分版本不提供相干辐照度探测器或偏振追迹选项。上表与 §3.3 的步骤
+      为通用建模范式，<b>每一项都需在你的版本中确认可用性后再执行</b>；若授权不支持相干探测，可用本报告的 Python 模型
+      替代条纹生成环节，序列模式仍可完成波前优化与公差分析。
+    </p>
+  </div>
+</section>
+
+<!-- ============ CH 4 ============ -->
+<section id="ch4">
+  <h2><span class="num">04</span>工程风险与公差分析<span class="en">Risk Register &amp; Tolerance Budget</span></h2>
+  <p class="lede">
+    The two numbers that decide whether this instrument works are the arm detune (0.2 mm) against the
+    coherence length, and the fringe sampling against the detector. 决定成败的两个数：0.2 mm 行程与相干长度的比值，
+    以及条纹间距与像元尺寸的比值。
+  </p>
+
+  <h3>4.1 ±0.2 mm 位移意味着什么 <span class="en">What ±0.2 mm of travel really means</span></h3>
+  <div class="eq">
+    ΔOPD = 2 × 0.2 mm = 400 µm&nbsp;⟹&nbsp;m = ΔOPD / λ = 632.1 级次；
+    &nbsp;每位移 λ/2 = 316.4 nm 走过一个完整条纹周期
+    <span class="tag">(5)</span>
+  </div>
+  <ul class="plain">
+    <li><b>相位会卷绕 632 次。</b>单帧绝对相位无法覆盖整个行程，必须做时域解包（temporal phase unwrapping）或条纹计数，不能只靠一帧的空间解包。</li>
+    <li><b>对光源的要求被量化了。</b>若光源相干长度 L<sub>c</sub> ≈ 20 mm（多纵模 He–Ne 的下限），400 µm 的 OPD 只占 L<sub>c</sub>/50，对比度损失 &lt; 2%；若换成相干长度 3 mm 的普通半导体激光器，同样行程会吃掉约 12% 的对比度，且随温度漂移。</li>
+    <li><b>对机械的要求也被量化了。</b>要保住 V &gt; 0.8，行程内 OPD 抖动需 &lt; λ/10 ≈ 63 nm（对应镜面位移 &lt; 32 nm），这是选择导轨与驱动（压电 vs 丝杠）的直接依据。</li>
+  </ul>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:26%">Source<span class="zh">光源</span></th>
+      <th class="num" style="width:18%">L<sub>c</sub></th>
+      <th class="num" style="width:22%">V at OPD = 400 µm</th>
+      <th>Verdict<span class="zh">结论</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>稳频 He–Ne（单纵模）</td><td class="num">≥ 300 mm</td><td class="num">&gt; 0.98</td><td>余量充足，首选</td></tr>
+      <tr><td>普通 He–Ne（多纵模）</td><td class="num">≈ 20 mm</td><td class="num">≈ 0.98</td><td>可用</td></tr>
+      <tr><td>单纵模 DPSS（532/1064 nm）</td><td class="num">≈ 100 mm+</td><td class="num">&gt; 0.96</td><td>可用（需换波长重算 d 与级次）</td></tr>
+      <tr><td>普通半导体激光器</td><td class="num">1–10 mm</td><td class="num">0.90–0.67</td><td><b>风险</b>：长行程端可能跌破 0.8</td></tr>
+      <tr><td>LED / 宽谱</td><td class="num">≈ 10 µm</td><td class="num">≈ 0</td><td>不可用（仅能看零级附近）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tbl-note">V 按 V = exp(−OPD/L<sub>c</sub>) 估算（高斯型谱近似），量级判断用，精确值需按实际谱线形状积分。</p>
+
+  <h3>4.2 公差预算 <span class="en">Tolerance budget</span></h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:22%">Term<span class="zh">误差项</span></th>
+      <th class="num" style="width:20%">Budget<span class="zh">预算</span></th>
+      <th style="width:24%">Falls into<span class="zh">计入</span></th>
+      <th>Basis<span class="zh">依据</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>Mirror tilt 镜面倾斜</td><td class="num">≤ 4″（残差）</td><td>可扣除项（Zernike tilt）</td><td>线性斜坡在圆孔径内 RMS = PV/4，PV = 2αD；4″ → PV 0.03 λ</td></tr>
+      <tr><td>Fringe carrier 载波条纹数</td><td class="num">6–40 条</td><td>不占波前预算</td><td>每条纹 ≥ 6 px（Nyquist 余量）；本报告 10 条 = 164 px/条纹</td></tr>
+      <tr><td>Arm detune 臂长失配</td><td class="num">0.2 mm（工作点）</td><td>对比度预算</td><td>OPD 0.4 mm，需 ≤ L<sub>c</sub>/10</td></tr>
+      <tr><td>Defocus 离焦</td><td class="num">≤ 0.15 λ RMS</td><td>可扣除项（Zernike defocus）</td><td>对应约 7.9 环，需在分析中扣除，否则浪费动态范围</td></tr>
+      <tr><td>Beam-splitter ratio 分束比</td><td class="num">50/50 ± 2%</td><td>对比度预算</td><td>Γ = 2√(I₁I₂)/(I₁+I₂) = 0.96 at 48/52</td></tr>
+      <tr><td>Polarisation leakage 偏振泄漏</td><td class="num">≤ 0.97</td><td>对比度预算</td><td>膜层相位差与应力双折射；正交分量直接降 V</td></tr>
+      <tr><td>Coating imbalance 膜层不对称</td><td class="num">≤ 0.98</td><td>对比度预算</td><td>两臂反射相移不等价 → 等效 OPD 偏置</td></tr>
+      <tr><td>Detector sampling 探测器采样</td><td class="num">≥ 6 px/fringe</td><td>相位精度</td><td>4.88 µm 像元下最多约 273 条跨 8 mm</td></tr>
+      <tr><td>Vibration / air 振动与气流</td><td class="num">&lt; λ/10 抖动</td><td>随机误差（需平均）</td><td>63 nm 光程抖动即吃掉 10% 对比度</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>4.3 对比度预算级联 <span class="en">Visibility budget cascade</span></h3>
+  <div class="eq">
+    V = V<sub>coh</sub> × V<sub>pol</sub> × V<sub>ratio</sub> × V<sub>aberr</sub> × V<sub>det</sub>
+    = 0.98 × 0.97 × 0.96 × 0.95 × 0.98 ≈ <b>0.85</b>
+    <span class="tag">(6)</span>
+  </div>
+  <p>
+    这一级联解释了两件事：<b>（1）</b>为什么实测 0.879 仍算"健康"——它已经包含了 5 项独立损失，理论天花板本就不是 1.0；
+    <b>（2）</b>为什么单纯"换更好的相机"救不了对比度——探测器项只占 2%，真正的短板在偏振与分束比。
+    降低对比度的每一环都应在预算表里有独立行，否则排查时无法定位。
+  </p>
+
+  <h3>4.4 风险登记 <span class="en">Risk register</span></h3>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th style="width:26%">Risk<span class="zh">风险</span></th>
+      <th style="width:12%">Impact<span class="zh">影响</span></th>
+      <th style="width:14%">Likelihood<span class="zh">概率</span></th>
+      <th>Mitigation<span class="zh">缓解</span></th>
+    </tr></thead>
+    <tbody>
+      <tr><td>ΔL 落在零附近，条纹"干净"但无相位信息</td><td>失效</td><td>中</td><td>强制工作点偏置 5～10 环；上电自检先数环</td></tr>
+      <tr><td>换用短相干光源后长行程端 V 跌破 0.8</td><td>高</td><td>中</td><td>光源与行程联合选型（§4.1 表）；行程末端实测 V</td></tr>
+      <tr><td>分束立方面形/胶层引入不可扣除像差</td><td>高</td><td>中</td><td>序列模型加入等效面形；NSC 交叉验证；必要时改用平板分束镜</td></tr>
+      <tr><td>0.2 mm 行程内导轨直线度不足 → 条纹漂移</td><td>高</td><td>高</td><td>抖动预算 63 nm；闭环压电 + 参考干涉仪监测</td></tr>
+      <tr><td>探测器采样不足，边缘条纹混叠</td><td>中</td><td>低</td><td>条纹数上限 273 条；先算 px/fringe 再定焦距</td></tr>
+      <tr><td>Zemax 版本不支持相干探测</td><td>中</td><td>中</td><td>用本报告 Python 模型替代；序列模式完成波前与公差</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>4.5 结论 <span class="en">Conclusions</span></h3>
+  <ul class="plain">
+    <li>该指标组合（632.8 nm / 8 mm / ±0.2 mm / RMS λ/20 / V &gt; 0.8）在物理上是<b>可达</b>的：相干长度余量 ≥ 50×，采样余量 ≈ 27×，对比度余量约 6 个百分点。</li>
+    <li>真正紧的约束不是光学设计，而是<b>0.2 mm 行程内的机械稳定性</b>（63 nm 光程抖动）与<b>分束膜层的偏振行为</b>——两者都不在 Zemax 的默认公差项里，必须单独建模。</li>
+    <li>建模顺序不可颠倒：几何重合 → 光程匹配 → 波前优化 → 条纹 → 公差 → 杂散光。任何一步跳过，后面都会以"条纹不出现/对比度不够"的形式报复回来。</li>
+  </ul>
+</section>
+
+<footer>
+  <div class="mono">MICHELSON INTERFEROMETER · MODELING &amp; WAVEFRONT ANALYSIS</div>
+  <p style="margin-top:10px">
+    仿真环境 Python 3.13 / NumPy 2.5 / Matplotlib 3.11 · 采样 2048² · 报告生成 2026-11-11 ·
+    全部数值可由 <code>michelson_sim/michelson_fringe_sim.py</code> 复现。
+  </p>
+  <p>
+    Zemax 章节为工程理论指导，不含软件运行结果；菜单、操作数与探测器选项需按你的 OpticStudio 版本确认。
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
